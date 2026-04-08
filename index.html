@@ -1,128 +1,232 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test Résolution des Problèmes</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
-    .container { max-width: 800px; margin: 40px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    h1 { text-align: center; color: #333; }
-    .top-bar { display:flex; justify-content: space-between; align-items:center; margin-bottom: 10px; }
-    .question { margin-bottom: 20px; }
-    .answers label { display: block; margin: 5px 0; cursor: pointer; }
-    button { padding: 10px 20px; border: none; background: #007bff; color: white; border-radius: 5px; cursor: pointer; }
-    button:hover { background: #0056b3; }
-    .result { text-align: center; font-size: 20px; margin-top: 20px; font-weight: bold; }
-  </style>
+<meta charset="UTF-8">
+<title>QCM Interactif</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body {
+    background: linear-gradient(120deg, #4facfe, #00f2fe);
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-top: 30px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+h1 {
+    text-align: center;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.question {
+    background: #f1f8ff;
+    border-left: 5px solid #007bff;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    transition: 0.3s;
+}
+
+.question:hover {
+    background: #e6f0ff;
+}
+
+.answers label {
+    display: block;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.answers label:hover {
+    background: #d6eaff;
+}
+
+input[type="radio"] {
+    margin-right: 10px;
+}
+
+.points {
+    color: #ff9800;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+button {
+    width: 100%;
+    font-size: 18px;
+}
+
+#result {
+    margin-top: 25px;
+    font-size: 24px;
+    text-align: center;
+    font-weight: bold;
+    color: #28a745;
+}
+</style>
 </head>
+
 <body>
 
 <div class="container">
-  <div class="top-bar">
-    <h1 id="title">QCM - Résolution des Problèmes</h1>
-    <button onclick="toggleLang()" id="langBtn">AR</button>
-  </div>
+    <h1>📝 QCM Interactif</h1>
 
-  <div id="quiz"></div>
+    <div class="alert alert-primary">
+        <strong>📌 Instructions :</strong>
+        <ul>
+            <li>Choisis une seule réponse pour chaque question.</li>
+            <li>Chaque réponse donne 1 à 4 points.</li>
+            <li>À la fin, clique sur le bouton pour voir ton score.</li>
+        </ul>
+    </div>
 
-  <button onclick="submitQuiz()" id="submitBtn">Valider</button>
+    <form id="quizForm"></form>
 
-  <div class="result" id="result"></div>
+    <button class="btn btn-success mt-3" onclick="calculerScore()">🎯 Voir le résultat</button>
+
+    <div id="result"></div>
 </div>
 
 <script>
-let lang = 'fr';
+const questions = [
+{
+q: "1. Quand tu commences un projet :",
+answers: [
+{ text: "A) Je cherche toutes les informations et les faits.", value: 4 },
+{ text: "B) Je pense à mes sentiments et à mon intuition.", value: 3 },
+{ text: "C) Je pense aux problèmes possibles.", value: 1 },
+{ text: "D) Je cherche des idées nouvelles.", value: 2 }
+]
+},
+{
+q: "2. Quand il y a un problème dans l’équipe :",
+answers: [
+{ text: "A) J’analyse la situation avec des faits.", value: 4 },
+{ text: "B) J’écoute les émotions des autres.", value: 3 },
+{ text: "C) Je fais attention aux risques.", value: 1 },
+{ text: "D) Je propose des solutions créatives.", value: 2 }
+]
+},
+{
+q: "3. Pour organiser une réunion :",
+answers: [
+{ text: "A) Je prépare un plan clair et organisé.", value: 4 },
+{ text: "B) Je pense à l’ambiance et aux personnes.", value: 3 },
+{ text: "C) J’essaie d’éviter les problèmes.", value: 1 },
+{ text: "D) Je propose des idées nouvelles.", value: 2 }
+]
+},
+{
+q: "4. Quand tu dois choisir entre deux options :",
+answers: [
+{ text: "A) Je compare les informations et les faits.", value: 4 },
+{ text: "B) Je choisis selon mon sentiment.", value: 3 },
+{ text: "C) Je regarde les risques.", value: 1 },
+{ text: "D) Je pense aux avantages.", value: 2 }
+]
+},
+{
+q: "5. Pour motiver ton équipe :",
+answers: [
+{ text: "A) Je donne des informations claires.", value: 3 },
+{ text: "B) J’encourage les émotions positives.", value: 4 },
+{ text: "C) Je parle des problèmes possibles.", value: 1 },
+{ text: "D) Je propose des idées nouvelles.", value: 2 }
+]
+},
+{
+q: "6. Quand tu planifies un événement :",
+answers: [
+{ text: "A) Je note tous les détails importants.", value: 4 },
+{ text: "B) Je pense à mon intuition.", value: 3 },
+{ text: "C) Je prévois les problèmes.", value: 1 },
+{ text: "D) Je cherche des idées originales.", value: 2 }
+]
+},
+{
+q: "7. Si quelqu’un propose une idée :",
+answers: [
+{ text: "A) Je vérifie si l’idée est basée sur des faits.", value: 4 },
+{ text: "B) Je regarde si j’aime cette idée.", value: 3 },
+{ text: "C) Je pense aux risques.", value: 1 },
+{ text: "D) Je développe l’idée avec créativité.", value: 2 }
+]
+},
+{
+q: "8. Quand tu travailles en équipe :",
+answers: [
+{ text: "A) Je suis un plan organisé.", value: 4 },
+{ text: "B) Je fais attention aux sentiments des autres.", value: 3 },
+{ text: "C) Je fais attention aux erreurs possibles.", value: 1 },
+{ text: "D) Je cherche des idées nouvelles.", value: 2 }
+]
+},
+{
+q: "9. Quand tu présentes un projet :",
+answers: [
+{ text: "A) Je montre les faits et les résultats.", value: 4 },
+{ text: "B) Je parle avec émotion.", value: 3 },
+{ text: "C) Je parle des problèmes possibles.", value: 1 },
+{ text: "D) Je montre les points positifs.", value: 2 }
+]
+},
+{
+q: "10. Pour résoudre un conflit :",
+answers: [
+{ text: "A) J’analyse la situation calmement.", value: 4 },
+{ text: "B) J’écoute les émotions des personnes.", value: 3 },
+{ text: "C) Je pense aux conséquences négatives.", value: 1 },
+{ text: "D) Je propose des solutions créatives.", value: 2 }
+]
+}
+];
 
-const data = {
-  fr: {
-    title: "QCM - Résolution des Problèmes",
-    submit: "Valider",
-    result: "Votre score :",
-    questions: [
-      { q: "Quelle est la première étape de la résolution des problèmes ?", a: ["Proposer des solutions", "Identifier le problème", "Appliquer la solution"], c: 1 },
-      { q: "Que fait-on après avoir identifié le problème ?", a: ["Analyser les causes", "Choisir une solution", "Ignorer le problème"], c: 0 },
-      { q: "Pourquoi proposer plusieurs solutions ?", a: ["Pour gagner du temps", "Pour choisir la meilleure", "Pour compliquer"], c: 1 },
-      { q: "Quelle méthode utilise plusieurs points de vue ?", a: ["Méthode Agile", "6 chapeaux de Bono", "Waterfall"], c: 1 },
-      { q: "Le chapeau rouge représente :", a: ["Les émotions", "Les faits", "Les risques"], c: 0 },
-      { q: "Quel est l'objectif principal de l'analyse des causes ?", a: ["Comprendre le problème", "Ignorer le problème", "Trouver des excuses"], c: 0 },
-      { q: "Que fait-on après avoir choisi la meilleure solution ?", a: ["Appliquer la solution", "Réfléchir encore", "Partager avec tout le monde"], c: 0 },
-      { q: "Que signifie le chapeau blanc dans la méthode de Bono ?", a: ["Émotions", "Faits et données", "Intuition"], c: 1 },
-      { q: "Pourquoi est-il important de considérer plusieurs solutions ?", a: ["Pour éviter les erreurs", "Pour perdre du temps", "Pour compliquer"], c: 0 },
-      { q: "Que fait-on après avoir appliqué une solution ?", a: ["Évaluer les résultats", "Oublier le problème", "Recommencer sans analyser"], c: 0 }
-    ]
-  },
-  ar: {
-    title: "اختبار حل المشكلات",
-    submit: "تأكيد",
-    result: "النتيجة:",
-    questions: [
-      { q: "ما هي أول خطوة في حل المشكلات؟", a: ["اقتراح الحلول", "تحديد المشكلة", "تطبيق الحل"], c: 1 },
-      { q: "ماذا نفعل بعد تحديد المشكلة؟", a: ["تحليل الأسباب", "اختيار الحل", "تجاهل المشكلة"], c: 0 },
-      { q: "لماذا نقترح عدة حلول؟", a: ["لتوفير الوقت", "لاختيار الأفضل", "لتعقيد الأمور"], c: 1 },
-      { q: "أي طريقة تعتمد على وجهات نظر متعددة؟", a: ["أجايل", "القبعات الست", "ووترفول"], c: 1 },
-      { q: "القبعة الحمراء تمثل:", a: ["المشاعر", "الحقائق", "المخاطر"], c: 0 },
-      { q: "ما الهدف الرئيسي من تحليل الأسباب؟", a: ["فهم المشكلة", "تجاهل المشكلة", "إيجاد الأعذار"], c: 0 },
-      { q: "ماذا نفعل بعد اختيار الحل الأفضل؟", a: ["تطبيق الحل", "التفكير مجدداً", "مشاركته مع الجميع"], c: 0 },
-      { q: "ماذا يعني القبعة البيضاء في طريقة بونو؟", a: ["المشاعر", "الحقائق والبيانات", "الحدس"], c: 1 },
-      { q: "لماذا من المهم النظر في عدة حلول؟", a: ["لتجنب الأخطاء", "لإضاعة الوقت", "لتعقيد الأمور"], c: 0 },
-      { q: "ماذا نفعل بعد تطبيق الحل؟", a: ["تقييم النتائج", "نسيان المشكلة", "إعادة المحاولة دون تحليل"], c: 0 }
-    ]
-  }
-};
+const form = document.getElementById("quizForm");
 
-function loadQuiz() {
-  const quiz = document.getElementById("quiz");
-  quiz.innerHTML = "";
-
-  data[lang].questions.forEach((q, index) => {
+questions.forEach((question, index) => {
     const div = document.createElement("div");
     div.classList.add("question");
 
-    div.innerHTML = `
-      <p><strong>${index + 1}. ${q.q}</strong></p>
-      <div class="answers">
-        ${q.a.map((a, i) => `
-          <label>
-            <input type="radio" name="q${index}" value="${i}"> ${a}
-          </label>
-        `).join("")}
-      </div>
-    `;
+    let html = `<h5>${question.q}</h5><div class="answers">`;
 
-    quiz.appendChild(div);
-  });
+    question.answers.forEach((answer) => {
+        html += `
+        <label>
+            <input type="radio" name="q${index}" value="${answer.value}">
+            ${answer.text} <span class="points">(${answer.value}pnt)</span>
+        </label>`;
+    });
 
-  document.getElementById("title").innerText = data[lang].title;
-  document.getElementById("submitBtn").innerText = data[lang].submit;
-  document.getElementById("langBtn").innerText = lang === 'fr' ? 'AR' : 'FR';
+    html += "</div>";
+    div.innerHTML = html;
+    form.appendChild(div);
+});
+
+function calculerScore() {
+    let score = 0;
+
+    questions.forEach((q, index) => {
+        const selected = document.querySelector(`input[name="q${index}"]:checked`);
+        if (selected) {
+            score += parseInt(selected.value);
+        }
+    });
+
+    document.getElementById("result").innerHTML =
+        "🎉 Ton score est : " + score + " points";
 }
-
-function submitQuiz() {
-  let score = 0;
-
-  data[lang].questions.forEach((q, index) => {
-    const selected = document.querySelector(`input[name="q${index}"]:checked`);
-    if (selected) {
-      if (parseInt(selected.value) === q.c) {
-        score++;
-      }
-    } else {
-      alert(lang === 'fr' ? `Vous n'avez pas répondu à la question ${index + 1}` : `لم تجب على السؤال ${index + 1}`);
-      return;
-    }
-  });
-
-  document.getElementById("result").innerText = `${data[lang].result} ${score} / ${data[lang].questions.length}`;
-}
-
-function toggleLang() {
-  lang = lang === 'fr' ? 'ar' : 'fr';
-  loadQuiz();
-  document.getElementById("result").innerText = "";
-}
-
-loadQuiz();
 </script>
 
 </body>
